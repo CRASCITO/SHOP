@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Crascito Product</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<button id="themeToggle" class="theme-toggle">🌙</button>
+
+<div class="product-container">
+
+  <div class="gallery" data-aos="fade-right">
+    <div class="image-wrapper">
+      <img id="mainImage" alt="Product Image">
+    </div>
+    <div id="thumbnails" data-aos="fade-up"></div>
+  </div>
+
+  <div class="details" data-aos="fade-left">
+    <h1 id="productName"></h1>
+
+    <p class="price">
+      <span class="mrp">₹<span id="mrp"></span></span>
+      <span class="sell">₹<span id="price"></span></span>
+    </p>
+
+    <button class="add-cart" data-aos="zoom-in">Add to Cart</button>
+    <button class="buy-now" id="buyNow" data-aos="zoom-in">Buy Now</button>
+  </div>
+
+</div>
+
+<script src="js/products.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<script>
+AOS.init({ duration: 1000, once: true });
+
+const id = new URLSearchParams(window.location.search).get("id");
+const product = products[id];
+
+if (!product) {
+  document.body.innerHTML = "<h2 style='text-align:center'>Product not found</h2>";
+}
+
+let current = 0;
+const mainImage = document.getElementById("mainImage");
+const thumbnails = document.getElementById("thumbnails");
+
+document.getElementById("productName").textContent = product.name;
+document.getElementById("price").textContent = product.price;
+document.getElementById("mrp").textContent = product.mrp;
+
+function showImage(i) {
+  current = i;
+  mainImage.src = product.images[i];
+}
+
+product.images.forEach((img, i) => {
+  const t = document.createElement("img");
+  t.src = img;
+  t.onclick = () => showImage(i);
+  thumbnails.appendChild(t);
+});
+
+showImage(0);
+
+// Auto Slide
+setInterval(() => {
+  current = (current + 1) % product.images.length;
+  showImage(current);
+}, 4000);
+
+// Swipe
+let startX = 0;
+mainImage.addEventListener("touchstart", e => startX = e.touches[0].clientX);
+mainImage.addEventListener("touchend", e => {
+  const endX = e.changedTouches[0].clientX;
+  if (startX - endX > 50) showImage((current + 1) % product.images.length);
+  if (endX - startX > 50) showImage((current - 1 + product.images.length) % product.images.length);
+});
+
+// Buy Now
+document.getElementById("buyNow").onclick = () => {
+  const msg = encodeURIComponent(product.instaMsg);
+  window.open(`https://ig.me/m/crascito?text=${msg}`, "_blank");
+};
+
+// Theme Toggle
+const toggle = document.getElementById("themeToggle");
+const root = document.documentElement;
+
+const saved = localStorage.getItem("theme");
+if (saved) {
+  root.setAttribute("data-theme", saved);
+  toggle.textContent = saved === "dark" ? "☀️" : "🌙";
+}
+
+toggle.onclick = () => {
+  const isDark = root.getAttribute("data-theme") === "dark";
+  const theme = isDark ? "light" : "dark";
+  root.setAttribute("data-theme", theme);
+  localStorage.setItem("theme", theme);
+  toggle.textContent = theme === "dark" ? "☀️" : "🌙";
+};
+</script>
+
+</body>
+</html>
